@@ -3,10 +3,9 @@
 import serial
 import time
 import binascii
-import io
 
-def printOffsets ( str ):
-    
+#Function for printing offsets
+def printOffsets():
    out = ''
    while ser.inWaiting() > 0:
       out += ser.read(1)
@@ -15,13 +14,14 @@ def printOffsets ( str ):
       out = out.split("I2C STOP BIT",1)[0];
       out = out.replace("READ: 0x", "")
       out = out.replace("  ACK 0x","")
+      out = out.replace("ACK", "")
       out = out.replace("NACK", "")
       out = out.replace("\n","")
-      print out
+      print out + '\n'
    time.sleep(0.5)
    ser.reset_input_buffer()
    ser.reset_output_buffer()
-   
+
    return;
 
 #Open Bus Pirate serial connection and clear previous input/output buffers
@@ -49,30 +49,51 @@ if mode.encode("hex") != '0d4932433e':
    ser.reset_input_buffer()
    ser.reset_output_buffer()
 
-output = ''
-
-#Read 0xa1
-ser.write('[0xa0 0x00][0xa1 r:256]\n')
+#Search for available memory addresses
+ser.write('(1)\n')
 time.sleep(0.5)
-print '0xa1:'
-printOffsets(output)
+out = ''
+while ser.inWaiting() > 0:
+   out += ser.read(1)
+   out = out.replace("\n", "")
+   out = out.replace("(1)", "")
+   out = out.replace("Searching I2C address space. Found devices at:", "")
+   out = out.replace("I2C>", "")
 
-#Read 0xa3
-ser.write('[0xa2 0x00][0xa3 r:256]\n')
-time.sleep(0.5)
-print '0xa3:'
-printOffsets(output)
+#If any address is found, print it
+if '0x' in out:
+   print 'Found addresses:\n' + out + '\n'
+   offsetsW = out.split(") ")
+   offsetsR = out.split(") ")
 
-#Read 0xa5
-ser.write('[0xa4 0x00][0xa5 r:256]\n')
-time.sleep(0.5)
-print '0xa5:'
-printOffsets(output)
+   #Build W addresses array
+   y = offsetsW.index(max(offsetsW))
+   while y != -3:
+      offsetsW[y+1] = offsetsW[y+1][:-7]
+      del offsetsW[y]
+      y = y - 2
 
-#Read 0xa7
-ser.write('[0xa6 0x00][0xa7 r:256]\n')
-time.sleep(0.5)
-print '0xa7:'
-printOffsets(output)
+   #Build R addresses array
+   y = offsetsR.index(max(offsetsR))
+   while y != -3:
+      del offsetsR[y+1]
+      y = y - 2
+
+   y = offsetsR.index(max(offsetsR))
+   while y != -1:
+      offsetsR[y] = offsetsR[y][:-7]
+      y = y -1
+
+   #Read and print offsets
+   y = offsetsR.index(min(offsetsR))
+   for y in range(0, offsetsR.index(max(offsetsR))+1):
+      readOffset = '[' + offsetsW[y] + ' 0x00][' + offsetsR[y] + ' r:1024]\n'
+      ser.write(readOffset)
+      time.sleep(0.5)
+      print offsetsR[y] + ':'
+      printOffsets()
+
+else:
+    print 'No addresses found'
 
 ser.close()
