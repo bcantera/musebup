@@ -8,7 +8,7 @@ import binascii
 #Check for execution privileges
 def privCheck():
     if os.getuid() != 0:
-       print "###Root privileges required, please run either as root or with sudo"
+       print ("###Root privileges required, please run either as root or with sudo")
        isAllowed = False
     else:
        isAllowed = True
@@ -19,11 +19,11 @@ def menu():
    menu = True
 
    while menu and privCheck:
-       print 31 * "-" , "MENU" , 31 * "-"
-       print "1. Dump EEPROM"
-       print "2. Write EEPROM"
-       print "3. Exit"
-       print 68 * "-"
+       print (31 * "-" , "MENU" , 31 * "-")
+       print ("1. Dump EEPROM")
+       print ("2. Write EEPROM")
+       print ("3. Exit")
+       print (68 * "-")
 
        option = raw_input()
        if option == '1':
@@ -31,10 +31,10 @@ def menu():
        elif option == '2':
           menu = False
        elif option == '3':
-          print "###Quiting"
+          print ("###Quiting")
           menu = False
        else:
-          print "\n### Incorrect option, please select a valid option from the menu\n"
+          print ("\n### Incorrect option, please select a valid option from the menu\n")
    return option
 
 #Function for printing offsets
@@ -51,10 +51,10 @@ def printOffsets():
      out = out.replace("ACK", "")
      out = out.replace("NACK", "")
      out = out.replace("\n","")
-     print out + '\n'
+     print (out + '\n')
 
      #Saving output to file
-     os.remove("dump.hex") 
+     os.remove("dump.hex")
      f = open( 'dump.hex', 'a' )
      f.write( '\n' + out + '\n' )
      f.close()
@@ -107,11 +107,11 @@ if checkBusPirate and checkPermission and menu() == '1':
       out = out.replace("I2C>", "")
 
    if "Warning: *Short or no pull-up" in out:
-      print "\n### Message from Bus pirate:\n" + out + "\n"
+      print ("\n### Message from Bus pirate:\n" + out + "\n")
 
    #If any address is found, print it
    if '0x' in out:
-      print '### Found addresses: \n' + out + '\n'
+      print ('### Found addresses: \n' + out + '\n')
       offsetsW = out.split(") ")
       offsetsR = out.split(") ")
 
@@ -139,16 +139,16 @@ if checkBusPirate and checkPermission and menu() == '1':
         readOffset = '[' + offsetsW[y] + ' 0x00][' + offsetsR[y] + ' r:1024]\n'
         ser.write(readOffset)
         time.sleep(0.5)
-        print offsetsR[y] + ':'
+        print (offsetsR[y] + ':')
         printOffsets()
 
    else:
-      print '### No addresses found'
+      print ('### No addresses found')
 
    ser.close()
 
 elif checkBusPirate == False and checkPermission :
-   print '### Bus pirate not found'
+   print ('### Bus pirate not found')
 
 
 #Search for available memory addresses
@@ -164,7 +164,7 @@ while ser.inWaiting() > 0:
 
 #If any address is found, print it
 if '0x' in out:
-   print 'Found addresses:\n' + out + '\n'
+   print ('Found addresses:\n' + out + '\n')
    offsetsW = out.split(") ")
    offsetsR = out.split(") ")
 
@@ -192,10 +192,10 @@ if '0x' in out:
       readOffset = '[' + offsetsW[y] + ' 0x00][' + offsetsR[y] + ' r:1024]\n'
       ser.write(readOffset)
       time.sleep(0.5)
-      print offsetsR[y] + ':'
+      print (offsetsR[y] + ':')
       printOffsets()
 
 else:
-    print 'No addresses found'
+    print ('No addresses found')
 
 ser.close()
