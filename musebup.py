@@ -61,7 +61,7 @@ def printOffsets():
      out = out.split("\n",7)[7];
      out = out.split("I2C STOP BIT",1)[0];
      out = out.replace("READ: 0x", "")
-     out = out.replace("  ACK 0x","")
+     out = out.replace("  ACK 0x"," ")
      out = out.replace("ACK", "")
      out = out.replace("NACK", "")
      out = out.replace("\n","")
